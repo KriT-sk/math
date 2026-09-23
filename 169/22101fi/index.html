@@ -1,1 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประกาศผลการเรียน คณิตศาสตร์พื้นฐาน 3</title>
+    
+    <!-- เรียกใช้ Font Sarabun สำหรับความเป็นทางการและอ่านง่าย -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- เรียกใช้ Tailwind CSS สำหรับตกแต่ง UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- เรียกใช้ PapaParse สำหรับอ่านไฟล์ CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- เรียกใช้ SweetAlert2 สำหรับแจ้งเตือนแบบสวยงาม -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- เรียกใช้ FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #cbebff 100%);
+            min-height: 100vh;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3b82f6;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="glass-effect w-full max-w-md rounded-3xl shadow-2xl overflow-hidden transform transition-all">
+        <!-- Header Section -->
+        <div class="bg-blue-600 p-6 text-center text-white">
+            <div class="inline-block p-3 bg-white/20 rounded-full mb-3">
+                <i class="fa-solid fa-graduation-cap text-3xl"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-wide">ระบบตรวจสอบผลการเรียน</h1>
+            <p class="text-blue-100 text-sm mt-1">รายวิชาคณิตศาสตร์พื้นฐาน 3 (ค22101)</p>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loadingSection" class="p-8 flex flex-col items-center justify-center">
+            <div class="loader mb-4"></div>
+            <p class="text-gray-500 text-sm">กำลังโหลดข้อมูล...</p>
+        </div>
+
+        <!-- Form Section -->
+        <div id="formSection" class="p-6 hidden">
+            <p class="text-gray-600 text-sm mb-5 text-center">กรุณาเลือกห้องเรียนและกรอกเลขประจำตัวเพื่อดูคะแนน</p>
+            
+            <form id="searchForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fa-solid fa-users mr-1 text-blue-500"></i> ห้องเรียน
+                    </label>
+                    <select id="roomSelect" required class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-white">
+                        <option value="" disabled selected>-- เลือกห้องเรียน --</option>
+                        <!-- ตัวเลือกห้องจะถูกเติมอัตโนมัติ -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fa-solid fa-id-card mr-1 text-blue-500"></i> เลขประจำตัวนักเรียน
+                    </label>
+                    <input type="text" id="studentIdInput" required placeholder="กรอกเลขประจำตัว" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 mt-4 flex justify-center items-center">
+                    <i class="fa-solid fa-magnifying-glass mr-2"></i> ตรวจสอบผลการเรียน
+                </button>
+            </form>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultSection" class="p-6 hidden bg-gray-50">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b-2 border-blue-100">
+                <h2 class="text-lg font-bold text-blue-800"><i class="fa-solid fa-clipboard-user mr-2"></i>ข้อมูลของคุณ</h2>
+                <button onclick="resetForm()" class="text-sm text-gray-500 hover:text-red-500 transition"><i class="fa-solid fa-arrow-left mr-1"></i>กลับ</button>
+            </div>
+            
+            <div id="scoreContainer" class="space-y-3">
+                <!-- ข้อมูลคะแนนจะแสดงที่นี่ -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL ของ CSV จาก Google Sheets
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhRVNghy0BzPtZ_lHtvZ_fRsBJuOU0fATeuGvQZ3qg1qzkKN3DxD3IBm0OB8RMqXaJKsr-bBNOdC7S/pub?gid=662696169&single=true&output=csv";
+        
+        // ** สำคัญ: กรุณาแก้ไขชื่อคอลัมน์ด้านล่างให้ตรงกับบรรทัดแรกใน Google Sheets ของคุณ **
+        const COL_ROOM = "ห้อง"; // ชื่อคอลัมน์ที่เก็บข้อมูล "ห้อง"
+        const COL_ID = "เลขประจำตัว"; // ชื่อคอลัมน์ที่เก็บข้อมูล "เลขประจำตัว"
+
+        let studentData = [];
+
+        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        window.onload = () => {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    studentData = results.data;
+                    populateRooms();
+                    document.getElementById('loadingSection').classList.add('hidden');
+                    document.getElementById('formSection').classList.remove('hidden');
+                },
+                error: function(err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด',
+                        text: 'ไม่สามารถโหลดข้อมูลได้ โปรดตรวจสอบลิงก์ หรือการเชื่อมต่ออินเทอร์เน็ต',
+                        confirmButtonText: 'ตกลง'
+                    });
+                }
+            });
+        };
+
+        // ฟังก์ชันดึงรายชื่อห้องมาใส่ใน Dropdown อัตโนมัติ
+        function populateRooms() {
+            const select = document.getElementById('roomSelect');
+            const rooms = new Set();
+            
+            studentData.forEach(row => {
+                if(row[COL_ROOM]) {
+                    rooms.add(row[COL_ROOM].trim());
+                }
+            });
+
+            // เรียงลำดับห้อง
+            const sortedRooms = Array.from(rooms).sort();
+            
+            sortedRooms.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room;
+                option.textContent = room;
+                select.appendChild(option);
+            });
+        }
+
+        // เมื่อกดค้นหา
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selectedRoom = document.getElementById('roomSelect').value;
+            const studentId = document.getElementById('studentIdInput').value.trim();
+
+            // ค้นหานักเรียนในข้อมูล
+            const student = studentData.find(row => 
+                row[COL_ROOM] && row[COL_ROOM].trim() === selectedRoom && 
+                row[COL_ID] && row[COL_ID].trim() === studentId
+            );
+
+            if (student) {
+                displayResult(student);
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ไม่พบข้อมูล',
+                    text: 'กรุณาตรวจสอบห้องเรียนและเลขประจำตัวอีกครั้ง',
+                    confirmButtonColor: '#3b82f6',
+                    confirmButtonText: 'ลองใหม่'
+                });
+            }
+        });
+
+        // แสดงผลข้อมูล
+        function displayResult(student) {
+            document.getElementById('formSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+            
+            const container = document.getElementById('scoreContainer');
+            container.innerHTML = '';
+
+            // วนลูปแสดงข้อมูลทุกคอลัมน์ (เว้นค่าว่าง)
+            Object.keys(student).forEach(key => {
+                if (student[key] && student[key].trim() !== '') {
+                    // กำหนดสีเน้นสำหรับหัวข้อที่น่าจะเป็น เกรด หรือ คะแนนรวม
+                    let highlightClass = "";
+                    let icon = "<i class='fa-solid fa-check text-green-500 text-sm'></i>";
+                    
+                    if(key.includes('เกรด') || key.includes('รวม')) {
+                        highlightClass = "bg-blue-100 text-blue-900 font-bold border-l-4 border-blue-500";
+                        icon = "<i class='fa-solid fa-star text-yellow-500 text-sm'></i>";
+                    }
+
+                    const item = `
+                        <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm border border-gray-100 ${highlightClass}">
+                            <span class="text-sm text-gray-600 flex items-center gap-2">${icon} ${key}</span>
+                            <span class="text-md font-semibold text-gray-800">${student[key]}</span>
+                        </div>
+                    `;
+                    container.innerHTML += item;
+                }
+            });
+        }
+
+        // ฟังก์ชันกลับไปหน้าค้นหา
+        function resetForm() {
+            document.getElementById('studentIdInput').value = '';
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('formSection').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
