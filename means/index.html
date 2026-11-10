@@ -1,1 +1,804 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สื่อจำลองการเรียนรู้ค่าเฉลี่ยเลขคณิต ม.2 (ร้านอาหารประจำกลุ่ม)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- KaTeX CSS & JS CDN for Math Equation Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- Google Fonts: Kanit & Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Sarabun', 'Kanit', sans-serif;
+            background-color: #f8fafc;
+        }
+        h1, h2, h3, .font-heading {
+            font-family: 'Kanit', sans-serif;
+        }
+        .katex-display {
+            margin: 0.5em 0 !important;
+        }
+        .katex {
+            font-size: 1.15em;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
 
+    <!-- TOP HEADER BAR -->
+    <header class="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl bg-white/20 p-2 rounded-2xl">🍽️</span>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-extrabold tracking-tight">สื่อจำลองการหาค่าเฉลี่ยเลขคณิต (ม.2)</h1>
+                    <p class="text-xs md:text-sm text-orange-100 font-medium">กิจกรรมสถิติ: ธีมที่ 5 ร้านอาหารประจำกลุ่ม (8 กลุ่ม)</p>
+                </div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-xs font-semibold">
+                สูตร: $\bar{x} = \frac{\sum x}{n}$
+            </div>
+        </div>
+    </header>
+
+    <!-- STEP PROGRESS STEPPER -->
+    <div class="bg-white border-b border-slate-200 shadow-sm py-4 sticky top-[72px] z-20">
+        <div class="max-w-4xl mx-auto px-4 flex justify-between items-center relative">
+            <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-200 z-0 mx-8"></div>
+            
+            <!-- Step 1 Indicator -->
+            <button onclick="goToStep(1)" id="step-indicator-1" class="relative z-10 w-10 h-10 rounded-full bg-orange-500 text-white font-black text-sm flex items-center justify-center shadow-lg ring-4 ring-orange-200 transition-all">
+                1
+            </button>
+            <!-- Step 2 Indicator -->
+            <button onclick="goToStep(2)" id="step-indicator-2" class="relative z-10 w-10 h-10 rounded-full bg-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center transition-all">
+                2
+            </button>
+            <!-- Step 3 Indicator -->
+            <button onclick="goToStep(3)" id="step-indicator-3" class="relative z-10 w-10 h-10 rounded-full bg-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center transition-all">
+                3
+            </button>
+            <!-- Step 4 Indicator -->
+            <button onclick="goToStep(4)" id="step-indicator-4" class="relative z-10 w-10 h-10 rounded-full bg-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center transition-all">
+                4
+            </button>
+            <!-- Step 5 Indicator -->
+            <button onclick="goToStep(5)" id="step-indicator-5" class="relative z-10 w-10 h-10 rounded-full bg-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center transition-all">
+                5
+            </button>
+        </div>
+        <div class="max-w-4xl mx-auto px-2 flex justify-between text-[11px] md:text-xs font-bold text-slate-500 mt-2 text-center">
+            <span class="w-1/5">1. เมนูอาหาร</span>
+            <span class="w-1/5">2. เลือก 8 กลุ่ม</span>
+            <span class="w-1/5">3. บวกผลรวม</span>
+            <span class="w-1/5">4. ตั้งหาร</span>
+            <span class="w-1/5">5. สรุปผล</span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- ==================== STEP 1: SHOW MENU ITEMS ==================== -->
+        <div id="step-1" class="step-content space-y-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm text-center">
+                <span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">ขั้นที่ 1 จาก 5</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-2">สำรวจเมนูอาหารประจำกลุ่ม (10 รายการ)</h2>
+                <p class="text-slate-600 text-sm md:text-base mt-1">ราคาเมนูอาหารทั้งหมดควบคุมไม่เกิน 200 บาท และลงท้ายด้วย 0, 5 และ 9</p>
+            </div>
+
+            <!-- MENU GRID -->
+            <div id="step1-menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <!-- Dynamic JS Render -->
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="flex justify-end pt-4">
+                <button onclick="goToStep(2)" class="bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg px-8 py-3.5 rounded-2xl shadow-lg hover:shadow-xl transition flex items-center gap-3">
+                    <span>ถัดไป: จำลองการเลือก 8 กลุ่ม</span>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== STEP 2: GROUP SELECTION ==================== -->
+        <div id="step-2" class="step-content hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm text-center">
+                <span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">ขั้นที่ 2 จาก 5</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-2">จำลองการเลือกเมนูอาหารสำหรับ 8 กลุ่ม</h2>
+                <p class="text-slate-600 text-sm md:text-base mt-1">คลิกปุ่มเลือกเมนูอาหารประจำแต่ละกลุ่ม หรือใช้ปุ่มสุ่มอัตโนมัติ</p>
+                
+                <div class="flex flex-wrap justify-center gap-3 mt-4">
+                    <button onclick="randomizeSelections()" class="bg-amber-500 hover:bg-amber-600 text-white text-xs md:text-sm font-bold px-4 py-2 rounded-xl shadow transition">
+                        🎲 สุ่มเลือกให้ครบ 8 กลุ่มอัตโนมัติ
+                    </button>
+                    <button onclick="resetSelections()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs md:text-sm font-bold px-4 py-2 rounded-xl transition">
+                        🔄 ล้างข้อมูลการเลือก
+                    </button>
+                </div>
+            </div>
+
+            <!-- 8 GROUPS GRID -->
+            <div id="group-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Dynamic JS Render -->
+            </div>
+
+            <!-- SELECTION SUMMARY STATUS BAR -->
+            <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📊</span>
+                    <span class="font-bold text-slate-700 text-sm md:text-base">สถานะการเลือกของนักเรียน:</span>
+                    <span id="selected-count-badge" class="bg-orange-500 text-white font-extrabold text-xs px-3 py-1 rounded-full">0 / 8 กลุ่ม</span>
+                </div>
+                <div class="text-xs text-slate-500 font-medium">($n = 8$ กลุ่ม สำหรับคำนวณค่าเฉลี่ย)</div>
+            </div>
+
+            <!-- STEP NAVIGATION -->
+            <div class="flex justify-between items-center pt-4">
+                <button onclick="prevStep()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-6 py-3 rounded-2xl transition">
+                    ← ย้อนกลับ
+                </button>
+                <button onclick="nextStep()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg px-8 py-3.5 rounded-2xl shadow-lg transition flex items-center gap-3">
+                    <span>ถัดไป: หาผลรวม ($\sum x$)</span>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== STEP 3: SUMMATION (SUM X) ==================== -->
+        <div id="step-3" class="step-content hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm text-center">
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">ขั้นที่ 3 จาก 5</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-2">หาผลรวมของข้อมูลทั้งหมด ($\sum x$)</h2>
+                <p class="text-slate-600 text-sm md:text-base mt-1">นำราคาอาหารที่ทั้ง 8 กลุ่มเลือก มารวมเข้าด้วยกัน</p>
+            </div>
+
+            <!-- VISUAL LIST OF SELECTED DATA -->
+            <div class="bg-slate-50 border border-slate-200 rounded-3xl p-6">
+                <h3 class="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
+                    <span>📋 ชุดข้อมูลราคาอาหารของนักเรียน 8 กลุ่ม ($x_1, x_2, \dots, x_8$):</span>
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3" id="sum-items-list">
+                    <!-- JS Render -->
+                </div>
+            </div>
+
+            <!-- ANIMATED SUM CALCULATOR WITH KATEX -->
+            <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 md:p-8 shadow-xl text-center space-y-6">
+                <div class="text-xs uppercase tracking-widest text-indigo-300 font-semibold">ขั้นตอนการบวกตัวเลขและสมการ</div>
+                
+                <div id="sum-equation-display" class="text-xl md:text-3xl text-amber-300 font-semibold leading-relaxed px-2 overflow-x-auto min-h-[60px] flex items-center justify-center">
+                    <!-- KaTeX Dynamic Render -->
+                </div>
+
+                <div class="pt-4 border-t border-indigo-800/60 flex flex-col items-center justify-center gap-2">
+                    <span class="text-slate-300 text-sm">ผลรวมทั้งหมด ($\sum x$) =</span>
+                    <div class="text-4xl md:text-6xl font-black text-amber-400 font-mono tracking-tight" id="sum-total-display">0</div>
+                    <span class="text-slate-400 text-xs">บาท</span>
+                </div>
+
+                <div class="flex justify-center gap-3 pt-2">
+                    <button onclick="runStepByStepSum()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-sm transition">
+                        ▶️ เล่นบวกทีละกลุ่ม (Step-by-Step)
+                    </button>
+                    <button onclick="showInstantSum()" class="bg-indigo-700 hover:bg-indigo-600 text-white font-medium px-5 py-2.5 rounded-xl text-sm transition">
+                        ⚡ แสดงผลรวมทันที
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4">
+                <button onclick="prevStep()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-6 py-3 rounded-2xl transition">
+                    ← ย้อนกลับ
+                </button>
+                <button onclick="nextStep()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-lg px-8 py-3.5 rounded-2xl shadow-lg transition flex items-center gap-3">
+                    <span>ถัดไป: คำนวณค่าเฉลี่ย ($\bar{x}$)</span>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== STEP 4: MEAN CALCULATION (X-BAR) ==================== -->
+        <div id="step-4" class="step-content hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm text-center">
+                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">ขั้นที่ 4 จาก 5</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-2">คำนวณค่าเฉลี่ยเลขคณิต ($\bar{x}$)</h2>
+                <p class="text-slate-600 text-sm md:text-base mt-1">แทนค่าผลรวม ($\sum x$) และ จำนวนกลุ่ม ($n = 8$) ลงในสูตร</p>
+            </div>
+
+            <!-- FORMULA CARD WITH KATEX -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-3xl p-6 md:p-8 shadow-lg">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    
+                    <!-- Formula Left -->
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 text-center space-y-4">
+                        <div class="text-xs uppercase tracking-wider font-semibold text-emerald-100">สูตรค่าเฉลี่ยเลขคณิต</div>
+                        <div class="text-3xl md:text-5xl font-bold py-2" id="katex-formula-card">
+                            $$\bar{x} = \frac{\sum x}{n}$$
+                        </div>
+                        <div class="text-xs text-emerald-100">
+                            เอ็กซ์บาร์ = ผลรวมของข้อมูลทั้งหมด $\div$ จำนวนข้อมูลทั้งหมด
+                        </div>
+                    </div>
+
+                    <!-- Substitution Right -->
+                    <div class="space-y-4">
+                        <div class="text-sm font-semibold text-emerald-100 uppercase tracking-wider">แทนค่าจากกิจกรรม:</div>
+                        <div class="bg-white text-slate-800 p-5 rounded-2xl shadow-inner space-y-3 font-sans">
+                            <div class="flex justify-between items-center text-sm md:text-base">
+                                <span class="text-slate-500">ผลรวมราคาอาหาร ($\sum x$) =</span>
+                                <span class="font-bold text-indigo-600 text-lg" id="calc-sum-val">$\sum x = 0\text{ บาท}$</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm md:text-base">
+                                <span class="text-slate-500">จำนวนกลุ่มทั้งหมด ($n$) =</span>
+                                <span class="font-bold text-orange-600 text-lg">$n = 8\text{ กลุ่ม}$</span>
+                            </div>
+                            <hr class="border-slate-200">
+                            <div class="flex justify-between items-center text-lg md:text-2xl font-bold">
+                                <span class="text-slate-700">การแทนค่า:</span>
+                                <span class="text-emerald-700" id="calc-fraction-display">$\bar{x} = \frac{0}{8}$</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- KATEX DETAILED EQUATION BREAKDOWN -->
+            <div class="bg-slate-900 text-white rounded-3xl p-6 text-center shadow-lg border border-slate-800">
+                <div class="text-xs uppercase tracking-widest text-emerald-400 font-semibold mb-2">แสดงขั้นตอนการหารโดยสมบูรณ์</div>
+                <div id="step4-katex-full-eq" class="text-2xl md:text-4xl text-amber-300 font-bold py-3 overflow-x-auto">
+                    <!-- KaTeX Dynamic Render -->
+                </div>
+            </div>
+
+            <!-- CALCULATION RESULT DISPLAY -->
+            <div class="bg-white border-2 border-emerald-400 rounded-3xl p-8 shadow-xl text-center space-y-4">
+                <div class="text-slate-500 font-medium text-sm md:text-base">ผลลัพธ์ค่าเฉลี่ยเลขคณิตราคาอาหารประจำกลุ่ม</div>
+                
+                <div class="flex items-center justify-center gap-3">
+                    <span class="text-4xl md:text-5xl font-mono font-black text-slate-800">$\bar{x}$ =</span>
+                    <span class="text-5xl md:text-7xl font-mono font-black text-emerald-600 tracking-tight" id="final-mean-value">0.00</span>
+                    <span class="text-slate-500 font-bold text-xl self-end pb-2">บาท/กลุ่ม</span>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 max-w-xl mx-auto text-xs md:text-sm text-slate-600 leading-relaxed" id="decimal-explanation">
+                    <!-- Dynamic rounding explanation -->
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4">
+                <button onclick="prevStep()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-6 py-3 rounded-2xl transition">
+                    ← ย้อนกลับ
+                </button>
+                <button onclick="nextStep()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg px-8 py-3.5 rounded-2xl shadow-lg transition flex items-center gap-3">
+                    <span>ถัดไป: สรุปผลและอธิบายสูตร</span>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== STEP 5: SUMMARY & FORMULA EXPLANATION ==================== -->
+        <div id="step-5" class="step-content hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm text-center">
+                <span class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">ขั้นที่ 5 จาก 5</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-2">สรุปมโนทัศน์และสูตรการหาค่าเฉลี่ยเลขคณิต</h2>
+                <p class="text-slate-600 text-sm md:text-base mt-1">บทสรุปการเรียนรู้เรื่องค่าเฉลี่ยเลขคณิตแบบไม่แจกแจงความถี่</p>
+            </div>
+
+            <!-- RESULT HIGHLIGHT CARD -->
+            <div class="bg-gradient-to-br from-purple-700 to-indigo-800 text-white rounded-3xl p-8 shadow-xl text-center space-y-4">
+                <div class="text-xs uppercase tracking-widest text-purple-200 font-semibold">สรุปผลการคำนวณประจำกิจกรรม</div>
+                <div class="text-3xl md:text-4xl font-extrabold">
+                    ค่าเฉลี่ยราคาอาหารของนักเรียน 8 กลุ่ม = <span class="text-amber-300 font-mono text-5xl" id="summary-mean-badge">0.00</span> บาท
+                </div>
+                <p class="text-xs md:text-sm text-purple-100 max-w-2xl mx-auto leading-relaxed">
+                    หมายความว่า หากนำเงินค่าอาหารของทั้ง 8 กลุ่มมารวมกัน แล้วแบ่งจ่ายให้ทุกกลุ่มกลุ่มละเท่าๆ กัน แต่ละกลุ่มจะจ่ายเงินกลุ่มละเท่านี้
+                </p>
+            </div>
+
+            <!-- FORMULA DECODING & REFLECTION -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Formula breakdown -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span>📐 ถอดรหัสสูตรทางสถิติ:</span>
+                    </h3>
+                    <div class="space-y-3 text-sm text-slate-700">
+                        <div class="p-3 bg-purple-50 rounded-xl border border-purple-100">
+                            <span class="font-bold text-purple-700 font-mono text-base">$\bar{x}$ (เอ็กซ์บาร์)</span> = ค่าเฉลี่ยเลขคณิตของข้อมูลชุดนี้
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+                            <span class="font-bold text-indigo-700 font-mono text-base">$\sum x$ (ซิกมาเอ็กซ์)</span> = ผลรวมของค่าของข้อมูลทุกตัว ($\sum x = x_1 + x_2 + \dots + x_n$)
+                        </div>
+                        <div class="p-3 bg-orange-50 rounded-xl border border-orange-100">
+                            <span class="font-bold text-orange-700 font-mono text-base">$n$ (เอ็น)</span> = จำนวนข้อมูลทั้งหมด (ในกิจกรรมนี้มี 8 กลุ่ม $n = 8$)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classroom reflection -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span>💡 คำถามชวนคิดหลังทำกิจกรรม:</span>
+                    </h3>
+                    <div id="reflection-1" class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <!-- Dynamic content from JS -->
+                    </div>
+                    <div class="text-xs text-slate-500 bg-amber-50 p-3 rounded-xl border border-amber-200 text-amber-900">
+                        <strong>ข้อสังเกต:</strong> หากมีกลุ่มหนึ่งเลือกอาหารราคาแพงมากผิดปกติ (Outlier) ค่าเฉลี่ยเลขคณิตจะถูกดึงให้สูงขึ้นทันที!
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4">
+                <button onclick="goToStep(1)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-6 py-3 rounded-2xl transition">
+                    🔄 เริ่มทำกิจกรรมใหม่อีกครั้ง
+                </button>
+                <button onclick="triggerConfetti()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-base px-6 py-3 rounded-2xl shadow-lg transition flex items-center gap-2">
+                    🎉 ฉลองเรียนจบกิจกรรม!
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MENU PICKER MODAL FOR STEP 2 -->
+    <div id="menu-picker-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 id="modal-group-title" class="text-lg font-bold text-slate-800">เลือกเมนูอาหารสำหรับกลุ่ม</h3>
+                <button onclick="closeMenuPicker()" class="text-slate-400 hover:text-slate-600 font-bold text-xl px-2">✕</button>
+            </div>
+            
+            <div id="modal-menu-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto p-1 flex-1">
+                <!-- Dynamic Menu Items -->
+            </div>
+
+            <div class="pt-2 text-right">
+                <button onclick="closeMenuPicker()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8 text-center text-xs text-slate-500 font-medium">
+        สื่อการเรียนรู้สถิติ ม.2 เรื่อง ค่าเฉลี่ยเลขคณิตแบบไม่แจกแจงความถี่
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 10 RESTAURANT MENU ITEMS (THEME 5)
+        const menuItems = [
+            { id: 1, name: 'เซ็ตข้าวหมูกรอบไข่ดาว', category: 'อาหารจานเดียว', price: 85, icon: '🥓', desc: 'หมูกรอบ น้ำราดฉ่ำ ซุปใส' },
+            { id: 2, name: 'เซ็ตบะหมี่เกี๊ยวหมูแดง', category: 'เส้น/ก๋วยเตี๋ยว', price: 70, icon: '🍜', desc: 'บะหมี่ทำเอง เกี๊ยวกุ้งแน่น' },
+            { id: 3, name: 'เซ็ตพิซซ่าถาดเล็ก', category: 'อาหารอิตาเลียน', price: 199, icon: '🍕', desc: 'แป้งหนานุ่ม ชีสทะลัก 4 ชิ้น' },
+            { id: 4, name: 'เซ็ตไก่ทอดซอสเกาหลี', category: 'อาหารฟาสต์ฟู้ด', price: 145, icon: '🍗', desc: 'ไก่ทอด 4 ชิ้น พร้อมเฟรนช์ฟรายส์' },
+            { id: 5, name: 'เซ็ตผัดไทยกุ้งสด', category: 'อาหารไทย', price: 90, icon: '🍤', desc: 'กุ้งตัวโต รสเข้มข้นกลมกล่อม' },
+            { id: 6, name: 'เซ็ตสเต๊กหมูพริกไทยดำ', category: 'สเต๊ก', price: 159, icon: '🥩', desc: 'หมูสันนอกนุ่ม สลัดผักฉ่ำ' },
+            { id: 7, name: 'เซ็ตส้มตำไก่ย่าง', category: 'อาหารไทย', price: 135, icon: '🥗', desc: 'ส้มตำไทย ไก่ย่าง ข้าวเหนียว' },
+            { id: 8, name: 'เซ็ตข้าวมันไก่ตอน', category: 'อาหารจานเดียว', price: 60, icon: '🐔', desc: 'ไก่นุ่ม ข้าวมันหอม น้ำจิ้มเด็ด' },
+            { id: 9, name: 'เซ็ตราเมนซุปกระดูกหมู', category: 'อาหารญี่ปุ่น', price: 179, icon: '🍜', desc: 'ชาชูชิ้นโต ไข่ต้มยางมะตอย' },
+            { id: 10, name: 'เซ็ตเบอร์เกอร์เนื้อชีส', category: 'ฟาสต์ฟู้ด', price: 129, icon: '🍔', desc: 'เนื้อย่างนำเข้า พร้อมโค้ก' }
+        ];
+
+        // GLOBAL STATE
+        let groupSelections = Array(8).fill(null);
+        let currentStep = 1;
+        let activeGroupIndex = 0;
+        let isSumAnimating = false;
+
+        // INITIALIZATION ON LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            renderStep1MenuGrid();
+            renderStep2UI();
+            updateStepView();
+            renderMath();
+        });
+
+        // KATEX MATH HELPER FUNCTIONS
+        function renderMath(targetEl = document.body) {
+            // Check if KaTeX library is fully loaded inside Google Sites iframe
+            if (!window.katex) {
+                // Retry rendering after a short delay if KaTeX CDN is still loading
+                setTimeout(() => renderMath(targetEl), 200);
+                return;
+            }
+
+            // Direct element rendering to bypass Google Sites backslash stripping
+            try {
+                const formulaCard = document.getElementById('katex-formula-card');
+                if (formulaCard) {
+                    katex.render("\\bar{x} = \\frac{\\sum x}{n}", formulaCard, { displayMode: true, throwOnError: false });
+                }
+            } catch (e) {
+                console.warn("KaTeX Direct Render Error:", e);
+            }
+
+            if (window.renderMathInElement) {
+                try {
+                    renderMathInElement(targetEl, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ],
+                        throwOnError: false
+                    });
+                } catch (e) {
+                    console.warn("KaTeX render error:", e);
+                }
+            }
+        }
+
+        function renderMathString(texString, displayMode = false) {
+            if (window.katex) {
+                try {
+                    return katex.renderToString(texString, { displayMode: displayMode, throwOnError: false });
+                } catch (e) {
+                    return texString;
+                }
+            }
+            return texString;
+        }
+
+        // STEP 1: RENDER MENU GRID
+        function renderStep1MenuGrid() {
+            const grid = document.getElementById('step1-menu-grid');
+            if (!grid) return;
+            grid.innerHTML = menuItems.map(item => `
+                <div class="bg-white border border-slate-200 hover:border-orange-400 rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-3xl">${item.icon}</span>
+                            <span class="text-[11px] font-bold text-orange-700 bg-orange-100 px-2.5 py-1 rounded-full">${item.category}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 leading-snug">${item.name}</h3>
+                        <p class="text-xs text-slate-500 mt-1">${item.desc}</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+                        <span class="text-xs text-slate-400 font-medium">ราคาต่อชุด</span>
+                        <span class="text-xl font-extrabold text-orange-600 font-mono">${item.price} <span class="text-xs font-bold text-slate-600">บาท</span></span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // STEP 2: RENDER GROUPS SELECTION UI
+        function renderStep2UI() {
+            const grid = document.getElementById('group-cards-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = groupSelections.map((item, index) => {
+                const isSelected = item !== null;
+                return `
+                    <div class="bg-white border ${isSelected ? 'border-orange-400 shadow-md' : 'border-slate-200'} rounded-2xl p-4 transition flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="bg-slate-800 text-white text-xs font-extrabold px-3 py-1 rounded-lg">กลุ่มที่ ${index + 1}</span>
+                            ${isSelected ? `<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">✓ เลือกแล้ว</span>` : `<span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">ยังไม่เลือก</span>`}
+                        </div>
+                        
+                        ${isSelected ? `
+                            <div class="text-center py-2">
+                                <span class="text-4xl block mb-1">${item.icon}</span>
+                                <h4 class="font-bold text-slate-800 text-sm leading-tight truncate">${item.name}</h4>
+                                <div class="text-lg font-black text-orange-600 font-mono mt-1">${item.price} บาท</div>
+                            </div>
+                        ` : `
+                            <div class="text-center py-4 border-2 border-dashed border-slate-200 rounded-xl my-1">
+                                <span class="text-slate-300 text-3xl block mb-1">❓</span>
+                                <span class="text-xs text-slate-400 font-medium">คลิกปุ่มด้านล่างเพื่อเลือก</span>
+                            </div>
+                        `}
+
+                        <button onclick="openMenuPicker(${index})" class="w-full mt-3 ${isSelected ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-orange-500 hover:bg-orange-600 text-white'} text-xs font-bold py-2 px-3 rounded-xl transition">
+                            ${isSelected ? '🔄 เปลี่ยนเมนู' : '👉 เลือกเมนูอาหาร'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            const count = groupSelections.filter(x => x !== null).length;
+            const badge = document.getElementById('selected-count-badge');
+            if (badge) badge.innerText = `${count} / 8 กลุ่ม`;
+        }
+
+        // MENU PICKER MODAL CONTROLS
+        function openMenuPicker(groupIndex) {
+            activeGroupIndex = groupIndex;
+            const modal = document.getElementById('menu-picker-modal');
+            const modalTitle = document.getElementById('modal-group-title');
+            if (modalTitle) modalTitle.innerText = `เลือกเมนูอาหารสำหรับ "กลุ่มที่ ${groupIndex + 1}"`;
+            
+            const optionsGrid = document.getElementById('modal-menu-options');
+            if (optionsGrid) {
+                optionsGrid.innerHTML = menuItems.map((item, itemIdx) => `
+                    <button onclick="selectMenuForGroup(${itemIdx})" class="text-left bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-400 rounded-xl p-3 transition flex items-center gap-3">
+                        <span class="text-3xl">${item.icon}</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-slate-800 text-sm truncate">${item.name}</div>
+                            <div class="text-xs text-slate-500">${item.category}</div>
+                        </div>
+                        <div class="text-orange-600 font-extrabold font-mono text-sm">${item.price} ฿</div>
+                    </button>
+                `).join('');
+            }
+
+            if (modal) modal.classList.remove('hidden');
+            playSound('click');
+        }
+
+        function closeMenuPicker() {
+            const modal = document.getElementById('menu-picker-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function selectMenuForGroup(itemIndex) {
+            groupSelections[activeGroupIndex] = menuItems[itemIndex];
+            closeMenuPicker();
+            renderStep2UI();
+            playSound('pop');
+        }
+
+        function randomizeSelections() {
+            for (let i = 0; i < 8; i++) {
+                const randomIdx = Math.floor(Math.random() * menuItems.length);
+                groupSelections[i] = menuItems[randomIdx];
+            }
+            renderStep2UI();
+            playSound('pop');
+        }
+
+        function resetSelections() {
+            groupSelections = Array(8).fill(null);
+            renderStep2UI();
+            playSound('click');
+        }
+
+        // STEP NAVIGATION
+        function goToStep(step) {
+            if (step > 2 && groupSelections.filter(x => x !== null).length < 8) {
+                alert("กรุณาเลือกเมนูอาหารให้ครบทั้ง 8 กลุ่มก่อนดำเนินการต่อครับ");
+                return;
+            }
+            currentStep = step;
+            updateStepView();
+
+            if (currentStep === 3) {
+                renderStep3Summation();
+            } else if (currentStep === 4) {
+                renderStep4Calculation();
+            } else if (currentStep === 5) {
+                renderStep5Summary();
+                triggerConfetti();
+                playSound('win');
+            }
+            renderMath();
+        }
+
+        function nextStep() {
+            if (currentStep === 2 && groupSelections.filter(x => x !== null).length < 8) {
+                alert("กรุณาเลือกเมนูอาหารให้ครบทั้ง 8 กลุ่มก่อนดำเนินการต่อครับ");
+                return;
+            }
+            if (currentStep < 5) {
+                goToStep(currentStep + 1);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            }
+        }
+
+        function updateStepView() {
+            for (let i = 1; i <= 5; i++) {
+                const stepEl = document.getElementById(`step-${i}`);
+                const indicatorBtn = document.getElementById(`step-indicator-${i}`);
+                
+                if (stepEl) {
+                    if (i === currentStep) {
+                        stepEl.classList.remove('hidden');
+                    } else {
+                        stepEl.classList.add('hidden');
+                    }
+                }
+
+                if (indicatorBtn) {
+                    if (i === currentStep) {
+                        indicatorBtn.className = 'w-10 h-10 rounded-full bg-orange-500 text-white font-black text-sm flex items-center justify-center shadow-lg ring-4 ring-orange-200 transition-all';
+                    } else if (i < currentStep) {
+                        indicatorBtn.className = 'w-10 h-10 rounded-full bg-emerald-500 text-white font-black text-sm flex items-center justify-center transition-all cursor-pointer';
+                    } else {
+                        indicatorBtn.className = 'w-10 h-10 rounded-full bg-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center transition-all cursor-pointer';
+                    }
+                }
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // RENDER STEP 3: SUMMATION
+        function renderStep3Summation() {
+            const container = document.getElementById('sum-items-list');
+            if (container) {
+                container.innerHTML = groupSelections.map((item, idx) => `
+                    <div class="bg-white border border-slate-200 rounded-2xl p-3 text-center shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 block mb-1">กลุ่มที่ ${idx + 1}</span>
+                        <span class="text-2xl my-1 block">${item.icon}</span>
+                        <div class="text-xs font-bold text-slate-800 truncate">${item.name}</div>
+                        <div class="text-sm font-extrabold text-orange-600 font-mono mt-1">${item.price} ฿</div>
+                    </div>
+                `).join('');
+            }
+            showInstantSum();
+        }
+
+        function showInstantSum() {
+            const totalSum = groupSelections.reduce((acc, curr) => acc + (curr ? curr.price : 0), 0);
+            const prices = groupSelections.map(item => item ? item.price : 0);
+            const eqTex = `\\sum x = ${prices.join(' + ')} = ${totalSum}\\text{ บาท}`;
+            
+            const eqDisplay = document.getElementById('sum-equation-display');
+            const totalDisplay = document.getElementById('sum-total-display');
+            if (eqDisplay) eqDisplay.innerHTML = renderMathString(eqTex, true);
+            if (totalDisplay) totalDisplay.innerText = totalSum;
+            renderMath(document.getElementById('step-3'));
+        }
+
+        function runStepByStepSum() {
+            if (isSumAnimating) return;
+            isSumAnimating = true;
+
+            const eqDisplay = document.getElementById('sum-equation-display');
+            const totalDisplay = document.getElementById('sum-total-display');
+
+            let currentRunningSum = 0;
+            let pricesSoFar = [];
+
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const price = groupSelections[i].price;
+                    currentRunningSum += price;
+                    pricesSoFar.push(price);
+
+                    const texStr = `\\sum x = ${pricesSoFar.join(' + ')} = ${currentRunningSum}\\text{ บาท}`;
+                    if (eqDisplay) eqDisplay.innerHTML = renderMathString(texStr, true);
+                    if (totalDisplay) totalDisplay.innerText = currentRunningSum;
+                    playSound('pop');
+
+                    if (i === 7) {
+                        isSumAnimating = false;
+                        playSound('win');
+                    }
+                }, i * 400);
+            }
+        }
+
+        // RENDER STEP 4: CALCULATION
+        function renderStep4Calculation() {
+            const totalSum = groupSelections.reduce((acc, curr) => acc + (curr ? curr.price : 0), 0);
+            const n = 8;
+            const rawMean = totalSum / n;
+            const roundedMean = rawMean.toFixed(2);
+
+            const sumVal = document.getElementById('calc-sum-val');
+            const fracDisplay = document.getElementById('calc-fraction-display');
+            const fullEq = document.getElementById('step4-katex-full-eq');
+            const finalVal = document.getElementById('final-mean-value');
+            const explanationBox = document.getElementById('decimal-explanation');
+
+            if (sumVal) sumVal.innerHTML = renderMathString(`\\sum x = ${totalSum}\\text{ บาท}`, false);
+            if (fracDisplay) fracDisplay.innerHTML = renderMathString(`\\bar{x} = \\frac{${totalSum}}{8}`, false);
+
+            let eqTex = `\\bar{x} = \\frac{\\sum x}{n} = \\frac{${totalSum}}{8} = ${rawMean === parseFloat(roundedMean) ? rawMean : rawMean.toFixed(3) + '\\dots \\approx ' + roundedMean}\\text{ บาท}`;
+            if (fullEq) fullEq.innerHTML = renderMathString(eqTex, true);
+            if (finalVal) finalVal.innerText = roundedMean;
+
+            if (explanationBox) {
+                if (Number.isInteger(rawMean)) {
+                    explanationBox.innerHTML = `<strong>ผลการหารลงตัว:</strong> ${totalSum} หารด้วย 8 ได้ผลลัพธ์เป็นจำนวนเต็มคือ <strong>${rawMean}</strong> บาทพอดี`;
+                } else {
+                    explanationBox.innerHTML = `<strong>ผลการหารได้ทศนิยม:</strong> ${totalSum} ÷ 8 = <strong>${rawMean}</strong> บาท <br><span class="text-emerald-700 font-semibold">ปัดเศษทศนิยม 2 ตำแหน่งได้เท่ากับ <strong>${roundedMean}</strong> บาท</span>`;
+                }
+            }
+            renderMath(document.getElementById('step-4'));
+        }
+
+        // RENDER STEP 5: SUMMARY & REFLECTION
+        function renderStep5Summary() {
+            const totalSum = groupSelections.reduce((acc, curr) => acc + (curr ? curr.price : 0), 0);
+            const meanVal = (totalSum / 8).toFixed(2);
+
+            const badge = document.getElementById('summary-mean-badge');
+            if (badge) badge.innerText = meanVal;
+
+            const higherGroups = [];
+            const lowerGroups = [];
+            const equalGroups = [];
+
+            groupSelections.forEach((item, idx) => {
+                if (item.price > parseFloat(meanVal)) higherGroups.push(`กลุ่มที่ ${idx + 1} (${item.price}฿)`);
+                else if (item.price < parseFloat(meanVal)) lowerGroups.push(`กลุ่มที่ ${idx + 1} (${item.price}฿)`);
+                else equalGroups.push(`กลุ่มที่ ${idx + 1} (${item.price}฿)`);
+            });
+
+            const ref1 = document.getElementById('reflection-1');
+            if (ref1) {
+                ref1.innerHTML = `
+                    จากค่าเฉลี่ย $\\bar{x} = ${meanVal}\\text{ บาท}$:<br>
+                    • <strong>กลุ่มที่เลือกราคาสูงกว่าค่าเฉลี่ย:</strong> ${higherGroups.join(', ') || 'ไม่มี'}<br>
+                    • <strong>กลุ่มที่เลือกราคาต่ำกว่าค่าเฉลี่ย:</strong> ${lowerGroups.join(', ') || 'ไม่มี'}<br>
+                    ${equalGroups.length ? `• <strong>กลุ่มที่เลือกราคาเท่ากับค่าเฉลี่ย:</strong> ${equalGroups.join(', ')}<br>` : ''}
+                `;
+            }
+            renderMath(document.getElementById('step-5'));
+        }
+
+        // SOUND EFFECTS (WEB AUDIO API SYNTHESIZER)
+        function playSound(type) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.1);
+                } else if (type === 'pop') {
+                    osc.frequency.setValueAtTime(600, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.08);
+                } else if (type === 'win') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, index) => {
+                        const noteOsc = ctx.createOscillator();
+                        const noteGain = ctx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(ctx.destination);
+                        noteOsc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.12);
+                        noteGain.gain.setValueAtTime(0.2, ctx.currentTime + index * 0.12);
+                        noteGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.12 + 0.3);
+                        noteOsc.start(ctx.currentTime + index * 0.12);
+                        noteOsc.stop(ctx.currentTime + index * 0.12 + 0.3);
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // CONFETTI LAUNCHER
+        function triggerConfetti() {
+            if (window.confetti) {
+                try {
+                    confetti({
+                        particleCount: 90,
+                        spread: 75,
+                        origin: { y: 0.6 }
+                    });
+                } catch(e) {}
+            }
+        }
+    </script>
+</body>
+</html>
